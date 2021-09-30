@@ -1,0 +1,130 @@
+[20:41, 30/09/2021] Montu: import pygame
+from pygame.locals import *
+from pygame import mixer
+import random
+
+
+pygame.init()
+
+screen_width = 600
+screen_height = 600
+
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("BreakOut")
+
+# brick colors 
+bg = (80, 80, 80)
+red = (242, 70, 75)
+green = (86, 194, 87)
+blue = (69, 177, 232)
+yellow = (255,188,19)
+
+#paddle colors
+paddle_col = (229,255,110)
+paddle_outline = (255, 250, 125)
+
+# text color 
+text_col = (255, 255, 255)
+
+# global game variables
+columns = 6
+rows = 6
+clock = pygame.time.Clock()
+fps = 1000
+live_ball = False
+game_over = 0
+
+
+# generate random positions for yellow brick...
+rand_block1 = round(random.randrange(7, 37)) 
+rand_block2 = round(random.randrange(7, 37)) 
+if rand_block1 == rand_block2:
+    rand_block2 = round(random.randrange(7, 37)) 
+
+
+# define font
+font = pygame.font.SysFont("Consolas", 30, bold=True)
+
+# text on the screen
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+
+
+# Brick Wall class
+class wall():
+    def _init_(self):
+        # brick dimension... 
+        self.width = screen_width//columns
+        self.height = 50
+
+    def create_wall(self):
+        # contains all the blocks present...
+        self.blocks = []
+        # Empty list contains individual blocks
+        block_individual = []
+        tag = 0
+        for row in range(rows):
+            block_row = []  # contains all the blocks of that row
+            # iterate through each columns in that row...
+            for col in range(columns):
+                # generate x and y position for each blocks and rectangle for that...
+                block_x = col * self.width
+                block_y = row * self.height
+                # creates rectangle of above dimension...
+                rect = pygame.Rect(block_x, block_y, self.width, self.height)
+
+                #assign block strength based on rows
+                if row < 2:
+                    # row 0 and 1
+                    strength = 3
+                    tag += 1
+                elif row < 4:
+                    # row 2 and 3
+                    strength = 2
+                    tag += 1
+                elif row < 6:
+                    # row 4 and 5
+                    strength = 1
+                    tag += 1
+
+                #create a list at this point to store rect and color data
+                block_individual = [rect, strength, tag]
+                # append that individual block to block_row
+                block_row.append(block_individual)
+            
+            # append the row to the full list of blocks
+            self.blocks.append(block_row)
+
+    def draw_wall(self):
+        for row in self.blocks:  # gives each row
+            for block in row:    # gives each block
+                # assign color based on block strength
+                # the block list contains = [rect, strength, tag] 
+                if block[1] == 3:
+                    block_col = blue
+                    if block[2] == rand_block1 or block[2] == rand_block2:
+                        block_col = yellow
+                elif block[1] == 2:
+                    block_col = green
+                    if block[2] == rand_block1 or block[2] == rand_block2:
+                        block_col = yellow
+                elif block[1] == 1:
+                    block_col = red
+                    if block[2] == rand_block1 or block[2] == rand_block2:
+                        block_col = yellow
+
+                # draw rectangle on the screen 
+                pygame.draw.rect(screen, block_col, block[0])
+                pygame.draw.rect(screen, bg, block[0], 2 )
+
+
+# paddle class
+class paddle():
+    def _init_(self):
+        self.reset()
+    
+    def move(self):
+        # reset movement direction
+        self.direction = 0
+        key = pygame.ke…
